@@ -21,8 +21,8 @@ export default function Prices() {
           const response = await axios.get(`http://localhost:8080/recommend`, {
             params: {
               uid: session.UserID,
-              k: 5,
-              remove_seen: false
+              k: 4,
+              remove_seen: true
             }
           })
           setRecommendedHotels(response.data.recommendations)
