@@ -1,19 +1,34 @@
-import { promises as fs } from 'fs'
 import path from 'path'
+import { promises as fs } from 'fs'
 import SuiteDetail from './suite-detail/suite-detail'
-import styles from './page.module.scss'
 
 export default async function SuiteDetailContainer({ params }) {
+  try {
+    const filePath = path.join(process.cwd(), '/public/hotels.json')
+    const file = await fs.readFile(filePath)
+    const suites = JSON.parse(file)
+    
+    const { id } = await params
+    const suiteId = parseInt(id)
+    const suite = suites.find(s => s.id === suiteId)
 
-  const { id } = params
-  const filePath = path.join(process.cwd(), '/public/hotels.json')    // path.join() is needed for proper Vercel deployment
+    if (!suite) {
+      return <div>Suite not found</div>
+    }
+
+    return <SuiteDetail suite={suite} />
+  } catch (error) {
+    console.error('Error:', error)
+    return <div>Error loading suite details</div>
+  }
+}
+
+export async function generateStaticParams() {
+  const filePath = path.join(process.cwd(), '/public/hotels.json')
   const file = await fs.readFile(filePath)
-  const suites = await JSON.parse(file)
-  const suite = suites.find(object => object.id == id)
+  const suites = JSON.parse(file)
 
-  return (
-    <main className={styles.main}>
-      <SuiteDetail suite={suite} params={params} />
-    </main>
-  )
+  return suites.map((suite) => ({
+    id: suite.id.toString(),
+  }))
 }
